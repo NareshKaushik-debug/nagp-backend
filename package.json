@@ -1,0 +1,17 @@
+{
+  "name": "ecommerce-backend",
+  "private": true,
+  "workspaces": [
+    "services/*"
+  ],
+  "scripts": {
+    "install:all": "npm install -ws",
+    "dev:auth": "npm --workspace services/auth-service run dev",
+    "dev:user": "npm --workspace services/user-service run dev",
+    "dev:catalog": "npm --workspace services/catalog-service run dev",
+    "dev:gateway": "npm --workspace services/api-gateway run dev"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
