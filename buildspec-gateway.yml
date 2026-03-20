@@ -1,0 +1,31 @@
+version: 0.2
+
+env:
+  variables:
+    AWS_REGION: ap-south-1
+    AWS_ACCOUNT_ID: 492528177741
+    ECR_REPO: api-gateway
+    SERVICE_NAME: api-gateway
+
+phases:
+  pre_build:
+    commands:
+      - aws --version
+      - echo Logging in to Amazon ECR
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+      - export ECR_REGISTRY=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+      - export IMAGE_TAG=${CODEBUILD_RESOLVED_SOURCE_VERSION}
+  build:
+    commands:
+      - echo Build image for $SERVICE_NAME
+      - docker build -t $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG Backend/services/api-gateway
+  post_build:
+    commands:
+      - echo Push image
+      - docker push $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG
+      - echo Write imagedefinitions.json
+      - printf '[{"name":"%s","imageUri":"%s"}]' "$SERVICE_NAME" "$ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG" > imagedefinitions.json
+
+artifacts:
+  files:
+    - imagedefinitions.json
